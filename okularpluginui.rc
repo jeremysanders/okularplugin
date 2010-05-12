@@ -1,0 +1,15 @@
+<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
+<kpartgui name="kparttut1" version="1">
+
+ <MenuBar>
+  <Menu name="file" >
+   <DefineGroup append="open_merge" name="file_open" />
+   <DefineGroup append="save_merge" name="file_save" />
+   <DefineGroup append="print_merge" name="file_print" />
+  </Menu>
+  <Merge/>
+ </MenuBar>
+ <ToolBar noMerge="1" name="mainToolBar" >
+   <Merge/>
+ </ToolBar>
+</kpartgui>
