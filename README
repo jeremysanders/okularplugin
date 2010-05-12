@@ -1,0 +1,10 @@
+This is a KParts-based Okular plugin designed to work as a Firefox
+compatible plugin.
+
+It uses Nokia's QtBrowserPlugin, part of Qt Solutions
+
+Build instructions:
+
+cmake .
+make
+make install
