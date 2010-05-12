@@ -47,8 +47,8 @@ public:
 
     void transferComplete(const QString &url, int id, Reason r);
 
-private slots:
-    void slotActiveTimeOut();
+protected:
+    void enterEvent(QEvent *event);
 
 private:
     KParts::ReadOnlyPart *m_part;
@@ -59,6 +59,4 @@ private:
     Reason lastConfReason;
 
     KAction* m_printAction;
-    QTimer *activeTimer;
-
 };

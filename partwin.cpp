@@ -17,7 +17,6 @@
 // MA 02110-1301, USA
 
 #include <QtGui>
-#include <cstdio>
 
 #include <kservice.h>
 #include <kmessagebox.h>
@@ -28,61 +27,52 @@
 PartWin::PartWin(QWidget *parent)
   : KParts::MainWindow()
 {
-  setXMLFile ("kparttut1ui.rc");
+  setXMLFile("okularpluginui.rc");
 
   if( parent != 0 )
     setParent(parent);
+
   setFocusPolicy(Qt::StrongFocus);
   QApplication::setActiveWindow(this);
 
-  //query the .desktop file to load the requested Part
-  KService::Ptr service = KService::serviceByDesktopPath("okular_part.desktop");
+  // query the .desktop file to load the requested Part
+  KService::Ptr service =
+    KService::serviceByDesktopPath("okular_part.desktop");
+
   if (service)
     {
       m_part = service->createInstance<KParts::ReadOnlyPart>(0);
-      
+
       if (m_part)
 	{
-	  // tell the KParts::MainWindow that this is indeed
-	  // the main widget
+	  // make part window the main widget
 	  setCentralWidget(m_part->widget());
-	  
-	  
+
+	  // make a print action, as we don't get this by
+	  // default in the okular kpart
 	  m_printAction =
-	    KStandardAction::print(m_part, SLOT( slotPrint() ), actionCollection() );
-	  connect( m_part, SIGNAL( enablePrintAction(bool) ), m_printAction, SLOT( setEnabled(bool)));
-	  
-	  
+	    KStandardAction::print(m_part, SLOT( slotPrint() ),
+				   actionCollection() );
+	  connect( m_part, SIGNAL( enablePrintAction(bool) ),
+		   m_printAction, SLOT( setEnabled(bool)));
+
 	  setupGUI(ToolBar | Keys | StatusBar | Save);
-	  
-	  
-	  
-	  // and integrate the part's GUI with the shell's
+
+	  // integrate the part's GUI with the shell's
 	  createGUI(m_part);
-	  
 	}
       else
 	{
-          return;
+	  return;
 	}
     }
   else
     {
-      // if we couldn't find our Part, we exit since the Shell by
-      // itself can't do anything useful
-      KMessageBox::error(this, "service katepart.desktop not found");
+      // couldn't load anything up
+      KMessageBox::error(this, "service okular_part.desktop not found");
       qApp->quit();
-        // we return here, cause qApp->quit() only means "exit the
-        // next time we enter the event loop...
       return;
     }
-  
-  activeTimer = new QTimer(this);
-  connect( activeTimer, SIGNAL( timeout() ), this,
-	   SLOT( slotActiveTimeOut() ) );
-  activeTimer->start(1000);
-  
-
 }
 
 PartWin::~PartWin()
@@ -91,13 +81,11 @@ PartWin::~PartWin()
 
 bool PartWin::readData(QIODevice *source, const QString &/*format*/)
 {
-
-  QTemporaryFile file("/tmp/pdf_kpart_XXXXXX.pdf");
-  //file.setAutoRemove(false);
+  QTemporaryFile file( QDir::tempPath() + "/okularplugin_XXXXXX.pdf" );
 
   if (!source->open(QIODevice::ReadOnly))
     return false;
-  
+
   if( file.open() )
     {
       while( ! source->atEnd() ) {
@@ -108,8 +96,6 @@ bool PartWin::readData(QIODevice *source, const QString &/*format*/)
     }
   QString url = QString("file://") + file.fileName();
   m_part->openUrl( url );
-
-  // m_part->openUrl(source->objectName());
 
   return true;
 }
@@ -124,7 +110,6 @@ QString PartWin::dataSourceUrl() const
   return sourceUrl;
 }
 
-
 void PartWin::transferComplete(const QString &url, int id, Reason r)
 {
   lastConfId = id;
@@ -132,18 +117,17 @@ void PartWin::transferComplete(const QString &url, int id, Reason r)
   lastConfReason = r;
 }
 
-void PartWin::slotActiveTimeOut()
+void PartWin::enterEvent(QEvent *event)
 {
-  QObject *w =  QApplication::activeWindow();
-
-  if ( w == 0 )
+  if ( QApplication::activeWindow() == 0 )
     {
       QApplication::setActiveWindow(this);
-      return;
     }
+
+  KParts::MainWindow::enterEvent(event);
 }
 
-QTNPFACTORY_BEGIN("KPart PDF plugin",
-		  "NSAPI KPart PDF plugin");
-    QTNPCLASS(PartWin)
+QTNPFACTORY_BEGIN("Okular plugin",
+		  "Okular plugin using KParts");
+QTNPCLASS(PartWin)
 QTNPFACTORY_END()
