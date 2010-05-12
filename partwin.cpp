@@ -81,6 +81,7 @@ PartWin::~PartWin()
 
 bool PartWin::readData(QIODevice *source, const QString &/*format*/)
 {
+  // read data into temporary file
   QTemporaryFile file( QDir::tempPath() + "/okularplugin_XXXXXX.pdf" );
 
   if (!source->open(QIODevice::ReadOnly))
@@ -94,6 +95,8 @@ bool PartWin::readData(QIODevice *source, const QString &/*format*/)
       }
       file.flush();
     }
+
+  // open up temporary file into okular
   QString url = QString("file://") + file.fileName();
   m_part->openUrl( url );
 
@@ -119,6 +122,9 @@ void PartWin::transferComplete(const QString &url, int id, Reason r)
 
 void PartWin::enterEvent(QEvent *event)
 {
+  // this is required because firefox stops sending keyboard
+  // events to the plugin after opening windows (e.g. download dialog)
+  // setting the active window brings the events back
   if ( QApplication::activeWindow() == 0 )
     {
       QApplication::setActiveWindow(this);
