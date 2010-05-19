@@ -77,12 +77,26 @@ PartWin::PartWin(QWidget *parent)
 
 PartWin::~PartWin()
 {
+  QDir d;
+  for( QList<QString>::const_iterator i = toDeleteFiles.begin();
+       i != toDeleteFiles.end(); ++i )
+    {
+      d.remove(*i);
+    }
 }
 
-bool PartWin::readData(QIODevice *source, const QString &/*format*/)
+bool PartWin::readData(QIODevice *source, const QString &format)
 {
-  // read data into temporary file
-  QTemporaryFile file( QDir::tempPath() + "/okularplugin_XXXXXX.pdf" );
+  QString filetype;
+  if( format == "application/postscript" )
+    filetype = ".ps";
+  else if ( format == "application/x-dvi" )
+    filetype = ".dvi";
+  else
+    filetype= ".pdf";
+
+  QTemporaryFile file("/tmp/kpart_plugin_XXXXXX" + filetype);
+  file.setAutoRemove(false);
 
   if (!source->open(QIODevice::ReadOnly))
     return false;
@@ -96,7 +110,7 @@ bool PartWin::readData(QIODevice *source, const QString &/*format*/)
       file.flush();
     }
 
-  // open up temporary file into okular
+  toDeleteFiles.push_back( file.fileName() );
   QString url = QString("file://") + file.fileName();
   m_part->openUrl( url );
 

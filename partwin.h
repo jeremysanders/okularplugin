@@ -34,7 +34,10 @@ class PartWin : public KParts::MainWindow, QtNPBindable
 
   Q_PROPERTY(QString src READ dataSourceUrl WRITE setDataSourceUrl)
     
-  Q_CLASSINFO("MIME", "application/pdf:pdf:PDF document")
+  Q_CLASSINFO("MIME",
+	      "application/pdf:pdf:PDF document;"
+	      "application/postscript:ps:PostScript document;"
+	      "application/x-dvi:dvi:DVI document")
 
 public:
     PartWin(QWidget *parent = 0);
@@ -59,4 +62,6 @@ private:
     Reason lastConfReason;
 
     KAction* m_printAction;
+
+    QList<QString> toDeleteFiles;
 };
