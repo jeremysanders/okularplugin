@@ -39,6 +39,7 @@ class PartWin : public KParts::MainWindow, QtNPBindable
 	      "image/x.djvu:djv,djvu:DJVU document;"
 	      "image/x-djvu:djv,djvu:DJVU document;"
 	      "image/vnd.djvu:djv,djvu:DJVU document;"
+	      "application/x-chm:chm:Microsoft Compiled HTML Help;"
 	      "application/postscript:ps:PostScript document;"
 	      "application/x-dvi:dvi:DVI document")
 
