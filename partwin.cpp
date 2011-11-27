@@ -92,6 +92,12 @@ bool PartWin::readData(QIODevice *source, const QString &format)
     filetype = ".ps";
   else if ( format == "application/x-dvi" )
     filetype = ".dvi";
+  else if ( format == "image/vnd.djvu" )
+    filetype = ".djvu";
+  else if ( format == "image/x.djvu" )
+    filetype = ".djvu";
+  else if ( format == "image/x-djvu" )
+    filetype = ".djvu";
   else
     filetype= ".pdf";
 
