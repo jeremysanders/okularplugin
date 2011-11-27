@@ -33,9 +33,16 @@ class PartWin : public KParts::MainWindow, QtNPBindable
   Q_OBJECT
 
   Q_PROPERTY(QString src READ dataSourceUrl WRITE setDataSourceUrl)
-    
+
   Q_CLASSINFO("MIME",
 	      "application/pdf:pdf:PDF document;"
+	      "application/epub+zip:epub:EPUB document;"
+	      "image/tiff:tif,tiff:Tagged Image File Format;"
+	      "image/tiff-fx:tif,tiff:Tagged Image File Format;"
+	      "image/x.djvu:djv,djvu:DJVU document;"
+	      "image/x-djvu:djv,djvu:DJVU document;"
+	      "image/vnd.djvu:djv,djvu:DJVU document;"
+	      "application/x-chm:chm:Microsoft Compiled HTML Help;"
 	      "application/postscript:ps:PostScript document;"
 	      "application/x-dvi:dvi:DVI document")
 
