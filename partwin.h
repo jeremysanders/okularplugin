@@ -36,6 +36,8 @@ class PartWin : public KParts::MainWindow, QtNPBindable
 
   Q_CLASSINFO("MIME",
 	      "application/pdf:pdf:PDF document;"
+	      "image/tiff:tif,tiff:Tagged Image File Format;"
+	      "image/tiff-fx:tif,tiff:Tagged Image File Format;"
 	      "image/x.djvu:djv,djvu:DJVU document;"
 	      "image/x-djvu:djv,djvu:DJVU document;"
 	      "image/vnd.djvu:djv,djvu:DJVU document;"
