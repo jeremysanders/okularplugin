@@ -100,6 +100,8 @@ bool PartWin::readData(QIODevice *source, const QString &format)
     filetype = ".djvu";
   else if ( format == "application/x-chm" )
     filetype = ".chm";
+  else if ( format == "application/epub+zip" )
+    filetype = ".epub";
   else if ( format == "image/tiff" )
     filetype = ".tiff";
   else if ( format == "image/tiff-fx" )
