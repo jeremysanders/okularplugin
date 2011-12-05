@@ -21,16 +21,30 @@
 #include <kservice.h>
 #include <kmessagebox.h>
 #include <kactioncollection.h>
+#include <KDebug>
+#include <KMenuBar>
+#include <KToolBar>
+#include <QToolButton>
 
 #include "partwin.h"
+#include <KStandardDirs>
 
 PartWin::PartWin(QWidget *parent)
   : KParts::MainWindow()
 {
-  setXMLFile("okularpluginui.rc");
-
-  if( parent != 0 )
-    setParent(parent);
+  
+  QString dataDir = KStandardDirs::locate("data", "okularplugin/");
+  setXMLFile("okularplugin/okularpluginui.rc", false);
+  
+  if (! KStandardDirs::exists(dataDir)) {
+    KStandardDirs::makeDir(dataDir);
+  }
+  
+  // Set the full path to the "local" xml file, the one used for saving toolbar and shortcut changes
+  setLocalXMLFile("okularplugin/okularpluginui.rc");
+  
+//  if( parent != 0 )
+//    setParent(parent);
 
   setFocusPolicy(Qt::StrongFocus);
   QApplication::setActiveWindow(this);
@@ -39,40 +53,51 @@ PartWin::PartWin(QWidget *parent)
   KService::Ptr service =
     KService::serviceByDesktopPath("okular_part.desktop");
 
-  if (service)
-    {
-      m_part = service->createInstance<KParts::ReadOnlyPart>(0);
+  if (service) {
+    
+      m_part = service->createInstance<KParts::ReadOnlyPart>(this);
 
-      if (m_part)
-	{
-	  // make part window the main widget
-	  setCentralWidget(m_part->widget());
+      if (!m_part)
+	return;
+      
+      if (m_part) {
+	
+	// replace ui definition
+	m_part->replaceXMLFile(dataDir + "okularplugin_okularui.rc",
+			       "okularplugin/okularplugin_okularui.rc", 
+			       false);	
+	
+	// make part window the main widget
+	setCentralWidget(m_part->widget());
+	
+	setupActions();
 
-	  // make a print action, as we don't get this by
-	  // default in the okular kpart
-	  m_printAction =
-	    KStandardAction::print(m_part, SLOT( slotPrint() ),
-				   actionCollection() );
-	  connect( m_part, SIGNAL( enablePrintAction(bool) ),
-		   m_printAction, SLOT( setEnabled(bool)));
+	setupGUI(ToolBar | Keys | StatusBar | Save);
+	toolBar("mainToolBar")->setToolButtonStyle(Qt::ToolButtonIconOnly);
+	
+	// integrate the part's GUI with the shell's
+	createGUI(m_part);
+	
+	menuBar()->clear();
+	menuBar()->setVisible(false);
+      }
+      
+  } else {
+    // couldn't load anything up
+    KMessageBox::error(this, "service okular_part.desktop not found");
+    qApp->quit();
+    return;
+  }
+}
 
-	  setupGUI(ToolBar | Keys | StatusBar | Save);
 
-	  // integrate the part's GUI with the shell's
-	  createGUI(m_part);
-	}
-      else
-	{
-	  return;
-	}
-    }
-  else
-    {
-      // couldn't load anything up
-      KMessageBox::error(this, "service okular_part.desktop not found");
-      qApp->quit();
-      return;
-    }
+void PartWin::setupActions() {
+  // make a print action, as we don't get this by
+  // default in the okular kpart
+  m_printAction =
+    KStandardAction::print(m_part, SLOT( slotPrint() ), actionCollection());
+    connect( m_part, SIGNAL( enablePrintAction(bool) ),
+	     m_printAction, SLOT( setEnabled(bool)));  
 }
 
 PartWin::~PartWin()
@@ -108,8 +133,10 @@ bool PartWin::readData(QIODevice *source, const QString &format)
     filetype = ".tiff";
   else
     filetype= ".pdf";
-
-  QTemporaryFile file("/tmp/kpart_plugin_XXXXXX" + filetype);
+  
+  QFileInfo fileInfo(QUrl(sourceUrl).toString());
+  QString fileName = fileInfo.fileName();
+  QTemporaryFile file("/tmp/okularplugin_XXXXXX_" + fileName);
   file.setAutoRemove(false);
 
   if (!source->open(QIODevice::ReadOnly))
@@ -153,12 +180,14 @@ void PartWin::enterEvent(QEvent *event)
   // this is required because firefox stops sending keyboard
   // events to the plugin after opening windows (e.g. download dialog)
   // setting the active window brings the events back
-  if ( QApplication::activeWindow() == 0 )
+  if ( QApplication::activeWindow() == NULL )
     {
       QApplication::setActiveWindow(this);
     }
 
+QWidget::enterEvent(event);
   KParts::MainWindow::enterEvent(event);
+  
 }
 
 QTNPFACTORY_BEGIN("Okular plugin",

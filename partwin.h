@@ -56,11 +56,14 @@ public:
     bool readData(QIODevice *source, const QString &format);
 
     void transferComplete(const QString &url, int id, Reason r);
-
+    
 protected:
     void enterEvent(QEvent *event);
 
+
 private:
+    void setupActions();
+    
     KParts::ReadOnlyPart *m_part;
 
     QString sourceUrl;
@@ -69,6 +72,8 @@ private:
     Reason lastConfReason;
 
     KAction* m_printAction;
-
+    
     QList<QString> toDeleteFiles;
+    
+
 };

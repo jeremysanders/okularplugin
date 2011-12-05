@@ -5,9 +5,11 @@ It uses Nokia's QtBrowserPlugin, part of Qt Solutions
 
 Build instructions:
 
-$ cmake .
+$ mkdir build
+$ cd build
+$ cmake ..
 $ make
-$ make install
+$ sudo make install
 
 Make sure that libokularplugin.so is in your mozilla/firefox plugins path
 
