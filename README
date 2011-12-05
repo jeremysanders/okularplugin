@@ -13,9 +13,13 @@ $ sudo make install
 
 Make sure that libokularplugin.so is in your mozilla/firefox plugins path
 
-e.g.
+for 32Bit systems:
 $ mkdir -p ${HOME}/.mozilla/plugins
 $ ln -s /usr/lib/libokularplugin.so ${HOME}/.mozilla/plugins
+
+for 64Bit systems: 
+$ mkdir -p ${HOME}/.mozilla/plugins
+$ ln -s /usr/lib64/libokularplugin.so ${HOME}/.mozilla/plugins
 
 You'll need to make /usr/lib/libokularplugin.so point to the file
 which was installed by the make install step above.
