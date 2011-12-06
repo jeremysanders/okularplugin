@@ -134,9 +134,9 @@ bool PartWin::readData(QIODevice *source, const QString &format)
   else
     filetype= ".pdf";
   
-  QFileInfo fileInfo(QUrl(sourceUrl).toString());
+  QFileInfo fileInfo(QUrl(sourceUrl).path());
   QString fileName = fileInfo.fileName();
-  QTemporaryFile file("/tmp/okularplugin_XXXXXX_" + fileName);
+  QTemporaryFile file("/tmp/okularplugin_XXXXXX_" + fileName + "." + filetype);
   file.setAutoRemove(false);
 
   if (!source->open(QIODevice::ReadOnly))
