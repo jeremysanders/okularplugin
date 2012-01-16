@@ -73,13 +73,13 @@ PartWin::PartWin(QWidget *parent)
 	setupActions();
 
 	setupGUI(ToolBar | Keys | StatusBar | Save);
-	toolBar("mainToolBar")->setToolButtonStyle(Qt::ToolButtonIconOnly);
+	toolBar("okularToolBar")->setToolButtonStyle(Qt::ToolButtonIconOnly);
 	
 	// integrate the part's GUI with the shell's
 	createGUI(m_part);
 	
 	menuBar()->clear();
-	menuBar()->setVisible(false);
+	//menuBar()->setVisible(false);
       }
       
   } else {
