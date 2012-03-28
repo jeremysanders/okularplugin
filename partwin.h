@@ -72,6 +72,7 @@ private:
     Reason lastConfReason;
 
     KAction* m_printAction;
+    bool m_guiInitialized;
     
     QList<QString> toDeleteFiles;
     
