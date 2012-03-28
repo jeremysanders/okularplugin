@@ -15,6 +15,7 @@ Build instructions
  - gcc
  - automoc
  - cmake
+ - kdelibs5-dev
 
 
 2. Installation:
