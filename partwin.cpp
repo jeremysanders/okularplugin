@@ -30,14 +30,15 @@
 #include <KStandardDirs>
 #include <KXMLGUIFactory>
 
+
+#define PART_DEBUG() kDebugDevNull()
+
 PartWin::PartWin(QWidget *parent)
   : KParts::MainWindow(), m_guiInitialized(false)
 {
-  
   kWarning() << " me == " << this;
   QString dataDir = KStandardDirs::locate("data", "okularplugin/");
   
-  kWarning() << " setXMLFile ";
   setXMLFile("okularplugin/okularpluginui.rc", false);
   
   
@@ -46,13 +47,11 @@ PartWin::PartWin(QWidget *parent)
   }
   
   // Set the full path to the "local" xml file, the one used for saving toolbar and shortcut changes
-  kWarning() << " setLocalXMLFile ";
   setLocalXMLFile("okularplugin/okularpluginui.rc");
   
 //  if( parent != 0 )
 //    setParent(parent);
 
-  kWarning() << " setFocusPolicy";
   setFocusPolicy(Qt::StrongFocus);
   //QApplication::setActiveWindow(this);
 
@@ -62,7 +61,7 @@ PartWin::PartWin(QWidget *parent)
 
   if (service) {
     
-      kWarning() << " createInstance";
+      PART_DEBUG() << " createInstance";
       m_part = service->createInstance<KParts::ReadOnlyPart>(this);
 
       if (!m_part)
@@ -71,27 +70,21 @@ PartWin::PartWin(QWidget *parent)
       if (m_part) {
 	
 	// replace ui definition
-	kWarning() << " replaceXML";
 	m_part->replaceXMLFile(dataDir + "okularplugin_okularui.rc",
 			       "okularplugin/okularplugin_okularui.rc", 
 			       false);	
 	
 	// make part window the main widget
-	kWarning() << " setCentralWidget";
 	setCentralWidget(m_part->widget());
 	
-	kWarning() << " setupActions";
 	setupActions();
 
-	kWarning() << " setupGUI";
 	setupGUI(ToolBar | Keys | StatusBar | Save);
 	toolBar("okularToolBar")->setToolButtonStyle(Qt::ToolButtonIconOnly);
 
 	// integrate the part's GUI with the shell's
-	kWarning() << " createGUI";
 	createGUI(m_part);
 
-	kWarning() << " clear";
 	menuBar()->clear();
 	m_guiInitialized = true;
 	//menuBar()->setVisible(false);
@@ -119,7 +112,6 @@ void PartWin::setupActions() {
     //
     //
     m_printAction->setParent(m_part->parent());
-   //m_part->widget()->window()->setVisible(false);
 }
 
 PartWin::~PartWin()
@@ -168,7 +160,6 @@ bool PartWin::readData(QIODevice *source, const QString &format)
   QTemporaryFile file("/tmp/okularplugin_XXXXXX_" + fileName);
   file.setAutoRemove(false);
 
-  kWarning() << " source->open";
   if (!source->open(QIODevice::ReadOnly))
     return false;
 
@@ -205,36 +196,21 @@ void PartWin::transferComplete(const QString &url, int id, Reason r)
   lastConfId = id;
   lastConfUrl = url;
   lastConfReason = r;
-  kWarning() << " transferComplete";
 }
 
 
 void PartWin::enterEvent(QEvent *event)
 {
- 
-  
-  //kWarning() << "enterEvent... eventType = " << event->type();
-  
-  //if (event->type() == QEvent::ContextMenu) {
-  //  kWarning() << "Event == ContextMenu";
-  //}
   // this is required because firefox stops sending keyboard
   // events to the plugin after opening windows (e.g. download dialog)
   // setting the active window brings the events back
-  if ( QApplication::activeWindow() == NULL )
-    {
-      kWarning() << "setting active Window to this...";
+  if ( QApplication::activeWindow() == NULL ) {
       QApplication::setActiveWindow(this);
-    }
+  }
     
-    //kWarning() << "height focusWidget == " << focusWidget()->frameSize().height();
-  //m_part->setParent(this);
-  //  this->setCentralWidget(m_part->widget());
-  //m_part->widget()->activateWindow();
-//QWidget::enterEvent(event);
-  //KParts::MainWindow::enterEvent(event);
-  
+   QWidget::enterEvent(event);
 }
+
 
 QTNPFACTORY_BEGIN("Okular plugin",
 		  "Okular plugin using KParts");
