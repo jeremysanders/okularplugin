@@ -2,7 +2,18 @@ project(okularplugin)
 
 FIND_PACKAGE(KDE4 REQUIRED)
 
-INCLUDE_DIRECTORIES( ${KDE4_INCLUDES} . qtbrowserplugin )
+INCLUDE(KDE4Defaults)
+
+INCLUDE_DIRECTORIES( 
+	${KDE4_INCLUDES} . qtbrowserplugin 
+        ${CMAKE_SOURCE_DIR}
+	${CMAKE_BINARY_DIR}
+)
+
+add_definitions(
+	${QT_DEFINITIONS} 
+	${KDE4_DEFINITIONS}
+)
 
 set(okularplugin_SRCS
    partwin.cpp
@@ -12,7 +23,7 @@ set(okularplugin_SRCS
 
 kde4_add_library(okularplugin SHARED ${okularplugin_SRCS})
 
-target_link_libraries(okularplugin ${KDE4_KDEUI_LIBS} ${KDE4_KPARTS_LIBS})
+target_link_libraries(okularplugin ${QT_QTGUI_LIBRARY} ${KDE4_KDEUI_LIBS} ${KDE4_KPARTS_LIBS})
 
 ########### install files ###############
 install(TARGETS okularplugin DESTINATION ${KDE4_LIB_DIR} )

@@ -16,6 +16,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 // MA 02110-1301, USA
 
+#ifndef PARTWIN_HPP
+#define PARTWIN_HPP
+
+
 #include <QWidget>
 #include <QString>
 #include <QIODevice>
@@ -78,3 +82,5 @@ private:
     
 
 };
+
+#endif
