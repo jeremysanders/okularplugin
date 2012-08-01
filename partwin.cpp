@@ -153,11 +153,11 @@ bool PartWin::readData(QIODevice *source, const QString &format)
   QFileInfo fileInfo(QUrl(sourceUrl).path());
   QString fileName = fileInfo.fileName();
   
-  if (! fileName.endsWith(filetype, Qt::CaseInsensitive)) {
-    fileName += filetype;
+  if (fileName.endsWith(filetype, Qt::CaseInsensitive)) {
+    fileName = fileName.left(fileName.length() - filetype.length());
   }
 
-  QTemporaryFile file("/tmp/okularplugin_XXXXXX_" + fileName);
+  QTemporaryFile file("/tmp/" + fileName + "_XXXXXX" + filetype);
   file.setAutoRemove(false);
 
   if (!source->open(QIODevice::ReadOnly))
