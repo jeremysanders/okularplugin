@@ -80,7 +80,9 @@ PartWin::PartWin(QWidget *parent)
 	setupActions();
 
 	setupGUI(ToolBar | Keys | StatusBar | Save);
+	toolBar()->setToolButtonStyle(Qt::ToolButtonIconOnly);
 	toolBar("okularToolBar")->setToolButtonStyle(Qt::ToolButtonIconOnly);
+	
 
 	// integrate the part's GUI with the shell's
 	createGUI(m_part);
@@ -110,7 +112,7 @@ void PartWin::setupActions() {
     //
     //
     //
-    m_printAction->setParent(m_part->parent());
+    //m_printAction->setParent(m_part->parent());
 }
 
 PartWin::~PartWin()
@@ -119,7 +121,8 @@ PartWin::~PartWin()
   for( QList<QString>::const_iterator i = toDeleteFiles.begin(); i != toDeleteFiles.end(); ++i ) {
       d.remove(*i);
   }
-    
+  
+  this->guiFactory()->removeClient(m_part);
   this->guiFactory()->removeClient(this);
   
   delete m_part;
