@@ -8,6 +8,5 @@
   <!-- we don't want a menubar -->
  </MenuBar>
  <ToolBar noMerge="1" name="mainToolBar"><text>Main Toolbar</text>
-	<Action name="file_print"/>
  </ToolBar>
 </kpartgui>

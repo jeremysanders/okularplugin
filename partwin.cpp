@@ -68,7 +68,6 @@ PartWin::PartWin(QWidget *parent)
 	return;
       
       if (m_part) {
-	
 	// replace ui definition
 	m_part->replaceXMLFile(dataDir + "okularplugin_okularui.rc",
 			       "okularplugin/okularplugin_okularui.rc", 
@@ -80,14 +79,14 @@ PartWin::PartWin(QWidget *parent)
 	setupActions();
 
 	setupGUI(ToolBar | Keys | StatusBar | Save);
-	toolBar()->setToolButtonStyle(Qt::ToolButtonIconOnly);
 	toolBar("okularToolBar")->setToolButtonStyle(Qt::ToolButtonIconOnly);
-	
 
 	// integrate the part's GUI with the shell's
 	createGUI(m_part);
-
+	
+	toolBar("okularToolBar")->insertAction(toolBar("okularToolBar")->actions().front(), this->actionCollection()->action("file_print"));
 	menuBar()->clear();
+
 	m_guiInitialized = true;
 	//menuBar()->setVisible(false);
       }
@@ -104,15 +103,51 @@ PartWin::PartWin(QWidget *parent)
 void PartWin::setupActions() {
   // make a print action, as we don't get this by
   // default in the okular kpart
-  m_printAction =
-    KStandardAction::print(m_part, SLOT( slotPrint() ), actionCollection());
-    connect( m_part, SIGNAL( enablePrintAction(bool) ),
-	     m_printAction, SLOT( setEnabled(bool)));
+  m_printAction = KStandardAction::print(m_part, SLOT( slotPrint() ), actionCollection());
+//     connect( m_part, SIGNAL( enablePrintAction(bool) ),
+// 	     this, SLOT( setEnabled(bool)));
    
+  /*
+  kWarning() << " ========================== this->actionCollection";
+  QList<QAction*> actions =  this->actionCollection()->actions();
+  QAction* oneAction;
+  
+  for (int i=0; i < actions.size(); ++i) {
+    oneAction = actions.at(i);
+    kWarning() << "" << oneAction;
+  }
+  
+  
+  
+  actions =  toolBar()->actions();
+  for (int i=0; i < actions.size(); ++i) {
+    oneAction = actions.at(i);
+    kWarning() << "toolBar actions << " << oneAction;
+   }
+  
+  kWarning() << "toolbar 1 = " << toolBars().first();
+  kWarning() << "toolbar 2 = " << toolBars().last();
+   
+   QString name("file_print");
+   //toolBar("okularToolBar")->addAction(this->actionCollection()->action(name));
+   
+   //toolBars().first()->insertAction(toolBars().first()->actions().first(), this->actionCollection()->action(name));
+   
+
+
+   
+   //toolBars().insert(toolBars(), toolBar("okularToolBar"));
+//this->insertToolBar(toolBars().first(), toolBar("okularToolBar"));
+   
+   kWarning() << "numToolBars = " << toolBars().count();
+   
+
     //
     //
     //
-    //m_printAction->setParent(m_part->parent());
+    //m_printAction->setParent(m_part->parent());*/
+
+   
 }
 
 PartWin::~PartWin()

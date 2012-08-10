@@ -7,8 +7,6 @@
   -->
   <!-- we don't want a menubar -->
  </MenuBar>
- <ToolBar noMerge="1" name="mainToolBar">
- </ToolBar>
  <ToolBar noMerge="1" name="okularToolBar">
   <text>Main Toolbar</text>
   <Action name="file_save_as"/>
