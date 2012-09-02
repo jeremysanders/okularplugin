@@ -15,13 +15,24 @@ add_definitions(
 	${KDE4_DEFINITIONS}
 )
 
-set(okularplugin_SRCS
-   partwin.cpp
-   qtbrowserplugin/qtbrowserplugin.cpp
-   qtbrowserplugin/qtbrowserplugin_x11.cpp
- )
+set(okularplugin_UIS
+	progresswidget.ui   
+)
 
-kde4_add_library(okularplugin SHARED ${okularplugin_SRCS})
+set(okularplugin_SRCS
+	partwin.cpp
+	progresswidget.cpp
+	qtbrowserplugin/qtbrowserplugin.cpp
+	qtbrowserplugin/qtbrowserplugin_x11.cpp
+)
+
+
+
+# this will run uic on .ui files:
+QT4_WRAP_UI( okularplugin_UI_HDRS ${okularplugin_UIS} )
+
+
+kde4_add_library(okularplugin SHARED ${okularplugin_SRCS} ${okularplugin_UI_HDRS})
 
 target_link_libraries(okularplugin ${QT_QTGUI_LIBRARY} ${KDE4_KDEUI_LIBS} ${KDE4_KPARTS_LIBS})
 

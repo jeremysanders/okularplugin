@@ -24,6 +24,7 @@
 #include <QString>
 #include <QIODevice>
 #include <QMetaClassInfo>
+#include <QProgressBar>
 
 #include <kaction.h>
 #include <kstdaction.h>
@@ -31,6 +32,7 @@
 
 #include <kparts/mainwindow.h>
 #include <qtbrowserplugin.h>
+#include <progresswidget.h>
 
 class PartWin : public KParts::MainWindow, QtNPBindable
 {
@@ -58,6 +60,8 @@ public:
     QString dataSourceUrl() const;
 
     bool readData(QIODevice *source, const QString &format);
+    
+    void readProgress(int lenRead, int size);
 
     void transferComplete(const QString &url, int id, Reason r);
     
@@ -68,7 +72,13 @@ protected:
 private:
     void setupActions();
     
+    void setupPart();
+    void setupProgressBar();
+    
     KParts::ReadOnlyPart *m_part;
+    
+    ProgressWidget *m_progressWidget;
+    bool m_progressBarInited;
 
     QString sourceUrl;
     int lastReqId, lastConfId;

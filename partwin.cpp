@@ -31,10 +31,11 @@
 #include <KXMLGUIFactory>
 
 
-#define PART_DEBUG() kDebugDevNull()
+//#define PART_DEBUG() kDebugDevNull()
+#define PART_DEBUG() kWarning()
 
 PartWin::PartWin(QWidget *parent)
-  : KParts::MainWindow(), m_guiInitialized(false)
+  : KParts::MainWindow(),  m_progressBarInited(false), m_guiInitialized(false)
 {
   PART_DEBUG() << " me == " << this;
   QString dataDir = KStandardDirs::locate("data", "okularplugin/");
@@ -71,24 +72,12 @@ PartWin::PartWin(QWidget *parent)
 	// replace ui definition
 	m_part->replaceXMLFile(dataDir + "okularplugin_okularui.rc",
 			       "okularplugin/okularplugin_okularui.rc", 
-			       false);	
+			       false);
 	
-	// make part window the main widget
-	setCentralWidget(m_part->widget());
+	m_progressWidget = new ProgressWidget(this->parentWidget());
+	setCentralWidget(m_progressWidget);
 	
-	setupActions();
-
-	setupGUI(ToolBar | Keys | StatusBar | Save);
-	toolBar("okularToolBar")->setToolButtonStyle(Qt::ToolButtonIconOnly);
-
-	// integrate the part's GUI with the shell's
-	createGUI(m_part);
-	
-	toolBar("okularToolBar")->insertAction(toolBar("okularToolBar")->actions().front(), this->actionCollection()->action("file_print"));
-	menuBar()->clear();
-
 	m_guiInitialized = true;
-	//menuBar()->setVisible(false);
       }
       
   } else {
@@ -99,55 +88,30 @@ PartWin::PartWin(QWidget *parent)
   }
 }
 
+void PartWin::setupPart() {
+  
+	// make part window the main widget
+	setCentralWidget(m_part->widget());
+	
+	setupActions();
+
+	setupGUI(ToolBar | Keys | StatusBar | Save);
+	toolBar("okularToolBar")->setToolButtonStyle(Qt::ToolButtonIconOnly);
+	
+	// integrate the part's GUI with the shell's
+	createGUI(m_part);
+	
+	toolBar("okularToolBar")->insertAction(toolBar("okularToolBar")->actions().front(), this->actionCollection()->action("file_print"));
+	menuBar()->clear();
+	
+	toolBar("okularToolBar")->show();
+	
+}
 
 void PartWin::setupActions() {
   // make a print action, as we don't get this by
   // default in the okular kpart
   m_printAction = KStandardAction::print(m_part, SLOT( slotPrint() ), actionCollection());
-//     connect( m_part, SIGNAL( enablePrintAction(bool) ),
-// 	     this, SLOT( setEnabled(bool)));
-   
-  /*
-  kWarning() << " ========================== this->actionCollection";
-  QList<QAction*> actions =  this->actionCollection()->actions();
-  QAction* oneAction;
-  
-  for (int i=0; i < actions.size(); ++i) {
-    oneAction = actions.at(i);
-    kWarning() << "" << oneAction;
-  }
-  
-  
-  
-  actions =  toolBar()->actions();
-  for (int i=0; i < actions.size(); ++i) {
-    oneAction = actions.at(i);
-    kWarning() << "toolBar actions << " << oneAction;
-   }
-  
-  kWarning() << "toolbar 1 = " << toolBars().first();
-  kWarning() << "toolbar 2 = " << toolBars().last();
-   
-   QString name("file_print");
-   //toolBar("okularToolBar")->addAction(this->actionCollection()->action(name));
-   
-   //toolBars().first()->insertAction(toolBars().first()->actions().first(), this->actionCollection()->action(name));
-   
-
-
-   
-   //toolBars().insert(toolBars(), toolBar("okularToolBar"));
-//this->insertToolBar(toolBars().first(), toolBar("okularToolBar"));
-   
-   kWarning() << "numToolBars = " << toolBars().count();
-   
-
-    //
-    //
-    //
-    //m_printAction->setParent(m_part->parent());*/
-
-   
 }
 
 PartWin::~PartWin()
@@ -160,12 +124,22 @@ PartWin::~PartWin()
   this->guiFactory()->removeClient(m_part);
   this->guiFactory()->removeClient(this);
   
+  delete m_progressWidget;
   delete m_part;
   delete m_printAction;
 }
 
+/** 
+ * This method is called from qtbrowserplugin when the download 
+ * is already finished.
+ * 
+ */
 bool PartWin::readData(QIODevice *source, const QString &format)
 {
+  
+  // Download finished
+  m_progressWidget->setValue(m_progressWidget->getMaximum());
+  
   QString filetype;
   if( format == "application/postscript" )
     filetype = ".ps";
@@ -197,29 +171,46 @@ bool PartWin::readData(QIODevice *source, const QString &format)
 
   QTemporaryFile file("/tmp/" + fileName + "_XXXXXX" + filetype);
   file.setAutoRemove(false);
-
+  
   if (!source->open(QIODevice::ReadOnly))
     return false;
 
-  if( file.open() )
-    {
+  if(file.open()) {
       while( ! source->atEnd() ) {
-  	QByteArray data = source->read(102400);
+  	QByteArray data = source->read(1024 * 1024 * 1024);
   	file.write(data);
       }
       file.flush();
-    }
+  }
 
+  
+  this->setupPart();
+  
   toDeleteFiles.push_back( file.fileName() );
   QString url = QString("file://") + file.fileName();
-  m_part->openUrl( url );
+  m_part->openUrl(url);
 
   return true;
+}
+
+void PartWin::readProgress(int lenRead, int size) {
+    if (!m_progressBarInited) { 
+	m_progressWidget->setMaximum(size);
+	m_progressWidget->setMinimum(0);
+
+	m_progressBarInited = true;
+    }
+    m_progressWidget->setValue(m_progressWidget->getValue() + lenRead);
 }
 
 void PartWin::setDataSourceUrl(const QString &url)
 {
   sourceUrl = url;
+  
+  QFileInfo fileInfo(QUrl(sourceUrl).path());
+  QString fileName = fileInfo.fileName();
+  m_progressWidget->setFileName(fileName);
+  
 }
 
 QString PartWin::dataSourceUrl() const
@@ -228,7 +219,7 @@ QString PartWin::dataSourceUrl() const
 }
 
 void PartWin::transferComplete(const QString &url, int id, Reason r)
-{
+{ 
   lastConfId = id;
   lastConfUrl = url;
   lastConfReason = r;

@@ -38,6 +38,7 @@
 
 #include <QtGui>
 #include <kdemacros.h>
+#include <KDebug>
 
 #include "qtnpapi.h"
 
@@ -1115,9 +1116,11 @@ NPP_Write(NPP instance, NPStream *stream, int32 /*offset*/, int32 len, void *buf
     if (!instance || !stream || !stream->pdata)
         return NPERR_INVALID_INSTANCE_ERROR;
 
+    QtNPInstance *This = (QtNPInstance*)instance->pdata;
     // this should not be called, as we always demand a download
     QtNPStream *qstream = (QtNPStream*)stream->pdata;
     QByteArray data((const char*)buffer, len); // make deep copy
+    This->bindable->readProgress(len, stream->end);
     qstream->buffer += data;
 
     return len;
@@ -1487,6 +1490,19 @@ bool QtNPBindable::readData(QIODevice *source, const QString &format)
     Q_UNUSED(format);
     return false;
 }
+
+
+/*!
+ * Reimplement this function to get progress information about downloading
+ * a stream.
+ */
+void QtNPBindable::readProgress(int lenRead, int size)
+{
+    Q_UNUSED(lenRead);
+    Q_UNUSED(size);
+    return;
+}
+
 
 /*!
     Requests that the \a url be retrieved and sent to the named \a window (or
