@@ -41,7 +41,8 @@ class PartWin : public KParts::MainWindow, QtNPBindable
   Q_PROPERTY(QString src READ dataSourceUrl WRITE setDataSourceUrl)
 
   Q_CLASSINFO("MIME",
-	      "application/pdf:pdf:PDF document;"
+	      "application/pdf:pdf:Portable Document Format;"
+	      "application/vnd.ms-xpsdocument:xps:Open XML Paper Specification;"
 	      "application/epub+zip:epub:EPUB document;"
 	      "image/tiff:tif,tiff:Tagged Image File Format;"
 	      "image/tiff-fx:tif,tiff:Tagged Image File Format;"
@@ -50,7 +51,12 @@ class PartWin : public KParts::MainWindow, QtNPBindable
 	      "image/vnd.djvu:djv,djvu:DJVU document;"
 	      "application/x-chm:chm:Microsoft Compiled HTML Help;"
 	      "application/postscript:ps:PostScript document;"
-	      "application/x-dvi:dvi:DVI document")
+	      "application/x-dvi:dvi:DVI document"
+	      "application/x-cbr:cbr:Comic Book Archive;"
+	      "image/g3fax:fax:Fax;"
+	      "text/fb2+xml:fb2:Fiction Book;"
+	      "application/vnd.palm:pdb:Palm Digital Media;"
+	     )
 
 public:
     PartWin(QWidget *parent = 0);

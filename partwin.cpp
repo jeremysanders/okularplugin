@@ -141,6 +141,10 @@ bool PartWin::readData(QIODevice *source, const QString &format)
   m_progressWidget->setValue(m_progressWidget->getMaximum());
   
   QString filetype;
+  QFileInfo fileInfo(QUrl(sourceUrl).path());
+  QString fileName = fileInfo.fileName();
+  QString extension = fileInfo.suffix();
+  
   if( format == "application/postscript" )
     filetype = ".ps";
   else if ( format == "application/x-dvi" )
@@ -159,18 +163,37 @@ bool PartWin::readData(QIODevice *source, const QString &format)
     filetype = ".tiff";
   else if ( format == "image/tiff-fx" )
     filetype = ".tiff";
-  else
+  else if ( format == "application/vnd.ms-xpsdocument" )
+    filetype = ".xps";
+  else if ( format == "image/g3fax" )
+    filetype = ".fax";
+  else if ( format == "text/fb2+xml" )
+    filetype = ".fb2";
+  else if ( format == "application/vnd.palm" )
+    filetype = ".pdb";
+  else if ( format == "application/x-cbr" ) {
+    if(extension == "cba") 
+      filetype = ".cba";
+    else if(extension == "cbt")
+      filetype = ".cbt";
+    else if(extension == "cbz")
+      filetype = ".cbz";
+    else if(extension == "cb7")
+      filetype = ".cb7";
+    else 
+      filetype = ".cbr";
+  } else {
     filetype= ".pdf";
+  }
+
   
-  QFileInfo fileInfo(QUrl(sourceUrl).path());
-  QString fileName = fileInfo.fileName();
-  
-  if (fileName.endsWith(filetype, Qt::CaseInsensitive)) {
-    fileName = fileName.left(fileName.length() - filetype.length());
+  if (fileName.endsWith(extension, Qt::CaseInsensitive)) {
+    // foo.pdf -> foo - pdf - .
+    fileName = fileName.left(fileName.length() - extension.length() - ((extension.length() > 0) ? 1 : 0));
   }
 
   QTemporaryFile file("/tmp/" + fileName + "_XXXXXX" + filetype);
-  file.setAutoRemove(false);
+  file.setAutoRemove(true);
   
   if (!source->open(QIODevice::ReadOnly))
     return false;
