@@ -9,7 +9,7 @@
  </MenuBar>
  <ToolBar noMerge="1" name="okularToolBar">
   <text>Main Toolbar</text>
-  <Action name="file_save_as"/>
+  <Action name="file_save_copy"/>
   <Separator name="separator_0"/>
   <Action name="go_previous"/>
   <Action name="go_next"/>
