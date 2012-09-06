@@ -142,7 +142,7 @@ bool PartWin::readData(QIODevice *source, const QString &format)
   
   QString filetype;
   QFileInfo fileInfo(QUrl(sourceUrl).path());
-  QString fileName = fileInfo.fileName();
+  QString fileName = QUrl::fromPercentEncoding(fileInfo.fileName().toUtf8());
   QString extension = fileInfo.suffix();
   
   if( format == "application/postscript" )
@@ -192,25 +192,25 @@ bool PartWin::readData(QIODevice *source, const QString &format)
     fileName = fileName.left(fileName.length() - extension.length() - ((extension.length() > 0) ? 1 : 0));
   }
 
-  QTemporaryFile file("/tmp/" + fileName + "_XXXXXX" + filetype);
-  file.setAutoRemove(true);
+  QTemporaryFile tmpFile("/tmp/" + fileName + "_XXXXXX" + filetype);
+  tmpFile.setAutoRemove(true);
   
   if (!source->open(QIODevice::ReadOnly))
     return false;
 
-  if(file.open()) {
+  if(tmpFile.open()) {
       while( ! source->atEnd() ) {
   	QByteArray data = source->read(1024 * 1024 * 1024);
-  	file.write(data);
+  	tmpFile.write(data);
       }
-      file.flush();
+      tmpFile.flush();
   }
-
   
   this->setupPart();
   
-  toDeleteFiles.push_back( file.fileName() );
-  QString url = QString("file://") + file.fileName();
+  toDeleteFiles.push_back(tmpFile.fileName());
+  
+  QString url = QString("file://") + tmpFile.fileName();
   m_part->openUrl(url);
 
   return true;

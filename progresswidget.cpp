@@ -40,7 +40,7 @@ void ProgressWidget::updateDownloadSpeed()
   qint64 sizeDiff = currSize - m_lastIntervalSize;
   
   
-  kWarning() << "speed = " << sizeDiff / timeDiff;
+  //kWarning() << "speed = " << sizeDiff / timeDiff;
   m_ui->lblDownloadProgress->setText(QString::number((sizeDiff / timeDiff)) + " KB/s");
   
   
