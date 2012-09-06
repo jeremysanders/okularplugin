@@ -27,6 +27,11 @@ set(okularplugin_SRCS
 )
 
 
+#
+# proper handling of RPATH:
+SET(CMAKE_SKIP_RPATH TRUE)
+
+
 
 # this will run uic on .ui files:
 QT4_WRAP_UI( okularplugin_UI_HDRS ${okularplugin_UIS} )
