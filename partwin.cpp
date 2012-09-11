@@ -124,6 +124,9 @@ PartWin::~PartWin()
   this->guiFactory()->removeClient(m_part);
   this->guiFactory()->removeClient(this);
   
+  m_tmpFile->remove();
+  
+  delete m_tmpFile;
   delete m_progressWidget;
   delete m_part;
   delete m_printAction;
@@ -192,25 +195,25 @@ bool PartWin::readData(QIODevice *source, const QString &format)
     fileName = fileName.left(fileName.length() - extension.length() - ((extension.length() > 0) ? 1 : 0));
   }
 
-  QTemporaryFile tmpFile("/tmp/" + fileName + "_XXXXXX" + filetype);
-  tmpFile.setAutoRemove(true);
+  m_tmpFile = new QTemporaryFile("/tmp/" + fileName + "_XXXXXX" + filetype);
+  m_tmpFile->setAutoRemove(true);
   
   if (!source->open(QIODevice::ReadOnly))
     return false;
 
-  if(tmpFile.open()) {
+  if(m_tmpFile->open()) {
       while( ! source->atEnd() ) {
   	QByteArray data = source->read(1024 * 1024 * 1024);
-  	tmpFile.write(data);
+  	m_tmpFile->write(data);
       }
-      tmpFile.flush();
+      m_tmpFile->flush();
   }
   
   this->setupPart();
   
-  toDeleteFiles.push_back(tmpFile.fileName());
+  toDeleteFiles.push_back(m_tmpFile->fileName());
   
-  QString url = QString("file://") + tmpFile.fileName();
+  QString url = QString("file://") + m_tmpFile->fileName();
   m_part->openUrl(url);
 
   return true;
