@@ -20,13 +20,18 @@
 #include <KDebug>
 
 ProgressWidget::ProgressWidget(QWidget *parent) : QWidget(parent),  m_ui(new Ui::ProgressWidget()),
-						  m_lastTimestamp(0), m_lastIntervalSize(0)
+						  m_lastTimestamp(0), m_bytesDownloadedTotalLastInterval(0),
+						  m_progressBarValue(0), m_avgDownloadSpeedWeighted(0),
+						  m_vecDownloadSpeeds(QVector<float>())
 {
   m_ui->setupUi(this);
   
+  m_ui->lblDownloadSpeed->setText("");
+  m_ui->lblRemainingDlTime->setText("");
+  
   m_timer = new QTimer(this);
   connect(m_timer, SIGNAL(timeout()), this, SLOT(updateDownloadSpeed()));
-  m_timer->setInterval(2000);
+  m_timer->setInterval(1500);
   m_timer->start();
 }
 
@@ -34,20 +39,69 @@ void ProgressWidget::updateDownloadSpeed()
 {
   
   qint64 currTimestamp = QDateTime::currentMSecsSinceEpoch();
-  qint64 timeDiff =  currTimestamp - m_lastTimestamp;
+  if (m_lastTimestamp == 0) {
+    m_lastTimestamp = currTimestamp - m_timer->interval();
+  }  
+  qint64 intervalLength = currTimestamp - m_lastTimestamp;
+  qint64 amountDownloadedTotal = m_progressBarValue;
+  qint64 amountDownloaded = amountDownloadedTotal - m_bytesDownloadedTotalLastInterval;
+  qint64 amountRemaining = m_ui->progressBar->maximum() - amountDownloadedTotal;
   
-  qint64 currSize = m_ui->progressBar->value();
-  qint64 sizeDiff = currSize - m_lastIntervalSize;
+  float currDownloadSpeed = (float)amountDownloaded / (float)intervalLength;
+  
+  if (m_avgDownloadSpeedWeighted == 0)
+    m_avgDownloadSpeedWeighted = currDownloadSpeed;
+    
+  if (m_vecDownloadSpeeds.size() >= 180) {
+    m_vecDownloadSpeeds.pop_front();
+  }
+  m_vecDownloadSpeeds.push_back(currDownloadSpeed);
+  
+#ifdef DEBUG_PROGRESSWIDGET
+  m_vecDownloadSpeedsForEstimation.push_back(currDownloadSpeed);
+#endif
+
+  float avgDownloadSpeed = 0;
+  for (int i=0; i<m_vecDownloadSpeeds.size(); ++i) {
+    avgDownloadSpeed += m_vecDownloadSpeeds[i];
+  }
+  avgDownloadSpeed /= m_vecDownloadSpeeds.size();
   
   
-  //kWarning() << "speed = " << sizeDiff / timeDiff;
-  m_ui->lblDownloadProgress->setText(QString::number((sizeDiff / timeDiff)) + " KB/s");
+  m_avgDownloadSpeedWeighted = 0.02 * currDownloadSpeed + 0.70 * m_avgDownloadSpeedWeighted + 0.28 * avgDownloadSpeed;
+
+  QTime remainingDlTime = QTime();
+  remainingDlTime = remainingDlTime.addSecs(amountRemaining / (float) m_avgDownloadSpeedWeighted / 1000.0f);  
+
   
+#ifdef DEBUG_PROGRESSWIDGET  
+  kWarning() << "remaining msces = " << amountRemaining / m_avgDownloadSpeedWeighted;
+  kWarning() << remainingDlTime;
+  kWarning() << "remainingTime = " << remainingDlTime.toString();
+  kWarning() << "currDownload Speed = " << currDownloadSpeed;
   
-  m_lastIntervalSize = currSize;
+  if (m_vecDownloadSpeedsForEstimation.size() % 60 == 0) {
+    calcEstimationError();
+  }
+#endif  
+  
+  m_ui->lblRemainingDlTime->setText(remainingDlTime.toString("h:mm:ss"));
+  m_ui->lblDownloadSpeed->setText(QString::number(m_avgDownloadSpeedWeighted, 'f', 2) + " KB/s");  
+  
+  m_bytesDownloadedTotalLastInterval = amountDownloadedTotal;
   m_lastTimestamp = currTimestamp;
 }
 
+#ifdef DEBUG_PROGRESSWIDGET
+void ProgressWidget::calcEstimationError() {
+    int sumDownloadSpeeds = 0;
+    for (int i=0; i<m_vecDownloadSpeedsForEstimation.size(); ++i) {
+      sumDownloadSpeeds += m_vecDownloadSpeedsForEstimation[i];
+    }
+    kWarning() << "avg = " << (float) sumDownloadSpeeds / (float) m_vecDownloadSpeedsForEstimation.size();
+    kWarning() << "deviation = " << (float) sumDownloadSpeeds / (float) m_vecDownloadSpeedsForEstimation.size() - m_avgDownloadSpeedWeighted;
+}
+#endif
 
 void ProgressWidget::setMaximum(int size)
 {
@@ -71,6 +125,7 @@ void ProgressWidget::setValue(int size)
   } else if (! m_timer->isActive()) {
     m_timer->start();
   }
+  m_progressBarValue = size;
   m_ui->progressBar->setValue(size);
 }
 

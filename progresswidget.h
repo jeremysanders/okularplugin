@@ -20,12 +20,17 @@
 #ifndef PROGRESSWIDGET_H
 #define PROGRESSWIDGET_H
 
+
+// TODO: make this configurable through cmake
+//#define DEBUG_PROGRESSWIDGET
+
 #include "ui_progresswidget.h"
 
 #include <QtGui>
 #include <QProgressBar>
 #include <qtimer.h>
 #include <QTimer>
+#include <QVector>
 
 class ProgressWidget : public QWidget
 {
@@ -54,7 +59,16 @@ private:
   QTimer *m_timer;
   
   qint64 m_lastTimestamp;
-  qint64 m_lastIntervalSize;
+  qint64 m_bytesDownloadedTotalLastInterval;
+  qint64 m_progressBarValue;
+  float m_avgDownloadSpeedWeighted;
+  
+  QVector<float> m_vecDownloadSpeeds;
+  
+#ifdef DEBUG_PROGRESSWIDGET
+  QVector<float> m_vecDownloadSpeedsForEstimation;
+  void calcEstimationError();
+#endif  
   
 };
 
