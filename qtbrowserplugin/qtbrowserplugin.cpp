@@ -1113,7 +1113,7 @@ NPP_WriteReady(NPP, NPStream *stream)
 extern "C" KDE_EXPORT  int32
 NPP_Write(NPP instance, NPStream *stream, int32 /*offset*/, int32 len, void *buffer)
 {
-    if (!instance || !stream || !stream->pdata)
+    if (!instance || !stream || !stream->pdata || !instance->pdata)
         return NPERR_INVALID_INSTANCE_ERROR;
 
     QtNPInstance *This = (QtNPInstance*)instance->pdata;
