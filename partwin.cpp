@@ -77,6 +77,7 @@ PartWin::PartWin(QWidget *parent)
 	m_progressWidget = new ProgressWidget(this->parentWidget());
 	setCentralWidget(m_progressWidget);
 	
+	m_progressWidget->setAttribute(Qt::WA_DeleteOnClose);
 	m_guiInitialized = true;
       }
       
@@ -127,7 +128,6 @@ PartWin::~PartWin()
   m_tmpFile->remove();
   
   delete m_tmpFile;
-  delete m_progressWidget;
   delete m_part;
   delete m_printAction;
 }
