@@ -34,21 +34,20 @@ browsers plugin path:
 
 Firefox
 -------
-
-for 32Bit systems:
+for 32Bit and 64Bit systems:
 $ mkdir -p ${HOME}/.mozilla/plugins
 $ ln -s /usr/lib/libokularplugin.so ${HOME}/.mozilla/plugins
 
-for 64Bit systems: 
-$ mkdir -p ${HOME}/.mozilla/plugins
-$ ln -s /usr/lib64/libokularplugin.so ${HOME}/.mozilla/plugins
+
+Chromium
+--------
+for 32Bit and 64Bit systems:
+$ sudo mkdir /usr/lib/chromium-browser/plugins
+$ sudo ln -s /usr/lib/libokularplugin.so /usr/lib/chromium-browser/plugins
 
 
 Chrome
-------
-for 32Bit systems:
-$ sudo ln -s /usr/lib/libokularplugin.so /usr/lib/chromium-browser/
-
-for 64Bit systems:
-$ sudo ln -s /usr/lib64/libokularplugin.so /usr/lib/chromium-browser/
-
+--------
+for 32Bit and 64Bit systems:
+$ sudo mkdir /opt/google/chrome/plugins
+$ sudo ln -s /usr/lib/libokularplugin.so /opt/google/chrome/plugins
