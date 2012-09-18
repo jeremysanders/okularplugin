@@ -604,6 +604,7 @@ public:
     QByteArray buffer;
     QFile file;
     QString mime;
+    qint64 bytesBuffered;
 
     NPError reason;
 
@@ -616,7 +617,7 @@ protected:
 };
 
 QtNPStream::QtNPStream(NPP instance, NPStream *st)
-    : reason(NPRES_DONE), npp(instance), stream(st)
+    : bytesBuffered(0), reason(NPRES_DONE), npp(instance), stream(st)
 {
 }
 
@@ -1113,14 +1114,22 @@ NPP_WriteReady(NPP, NPStream *stream)
 extern "C" KDE_EXPORT  int32
 NPP_Write(NPP instance, NPStream *stream, int32 /*offset*/, int32 len, void *buffer)
 {
-    if (!instance || !stream || !stream->pdata || !instance->pdata)
+    if (!instance || !stream || !stream->pdata)
         return NPERR_INVALID_INSTANCE_ERROR;
 
     QtNPInstance *This = (QtNPInstance*)instance->pdata;
     // this should not be called, as we always demand a download
     QtNPStream *qstream = (QtNPStream*)stream->pdata;
     QByteArray data((const char*)buffer, len); // make deep copy
-    This->bindable->readProgress(len, stream->end);
+    
+    // download starts before widget is created. 
+    if (This->bindable == NULL) {
+      // count how many bytes were downloaded until widget is created.
+      qstream->bytesBuffered += len;
+    } else {
+      This->bindable->readProgress(len + qstream->bytesBuffered, stream->end);
+      qstream->bytesBuffered = 0;
+    }
     qstream->buffer += data;
 
     return len;
