@@ -600,6 +600,7 @@ public:
 
     QString url() const;
     bool finish(QtNPBindable *bindable);
+    void invalidateNPStream();
 
     QByteArray buffer;
     QFile file;
@@ -609,15 +610,16 @@ public:
     NPError reason;
 
     NPP npp;
-    NPStream* stream;
 
 protected:
+    QString urlCached;
+    NPStream* stream;
     qint64 readData(char *, qint64);
     qint64 writeData(const char *, qint64);
 };
 
 QtNPStream::QtNPStream(NPP instance, NPStream *st)
-    : bytesBuffered(0), reason(NPRES_DONE), npp(instance), stream(st)
+    : bytesBuffered(0), reason(NPRES_DONE), npp(instance), urlCached(QString::fromLocal8Bit(st->url)), stream(st)
 {
 }
 
@@ -627,9 +629,7 @@ QtNPStream::QtNPStream(NPP instance, NPStream *st)
 */
 QString QtNPStream::url() const
 {
-    if (!stream)
-        return QString();
-    return QString::fromLocal8Bit(stream->url);
+    return urlCached;
 }
 
 class ErrorBuffer : public QBuffer
@@ -648,7 +648,7 @@ bool QtNPStream::finish(QtNPBindable *bindable)
         case NPRES_DONE:
             // no data at all? url is probably local file (Opera)
             if (buffer.isEmpty() && file.fileName().isEmpty()) {
-                QUrl u = QUrl::fromEncoded(stream->url);
+                QUrl u = QUrl::fromUserInput(urlCached);
                 QString lfn = u.toLocalFile();
                 if (lfn.startsWith("//localhost/"))
                     lfn = lfn.mid(12);
@@ -684,9 +684,12 @@ bool QtNPStream::finish(QtNPBindable *bindable)
             break;
         }
     }
-    stream->pdata = 0;
-    delete this;
     return res;
+}
+
+void QtNPStream::invalidateNPStream() {
+  stream->pdata = 0;
+  stream = 0;
 }
 
 // Helper class for forwarding signal emissions to the respective JavaScript
@@ -1053,8 +1056,9 @@ NPP_SetWindow(NPP instance, NPWindow* window)
 
     if (This->pendingStream) {
         This->pendingStream->finish(This->bindable);
+	delete This->pendingStream;
         This->pendingStream = 0;
-    }
+    }    
 
     if (!qobject_cast<QWidget*>(This->qt.object))
 	return NPERR_NO_ERROR;
@@ -1146,14 +1150,22 @@ NPP_DestroyStream(NPP instance, NPStream *stream, NPError reason)
     QtNPStream *qstream = (QtNPStream*)stream->pdata;
     qstream->reason = reason;
 
+    // (André Frimberger) Google Chromium (and probably Chrome) frees the 
+    // NPStream struct (directly) after NPP_DestroyStream returns. This 
+    // lead to memory corruption, because QtNPStream referenced and accessed
+    // the NPStream after NPP_DestroyStream was called.
+    //
+    // To prevent nasty side effects the reference to QtNPStream is set to null:
+    qstream->invalidateNPStream();
+    
     if (!This->qt.object) { // not yet initialized
         This->pendingStream = qstream;
         return NPERR_NO_ERROR;
     }
 
-    This->pendingStream = 0;
     qstream->finish(This->bindable);
-
+    delete This->pendingStream;
+    This->pendingStream = 0;
     return NPERR_NO_ERROR;
 }
 
