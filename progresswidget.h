@@ -41,11 +41,15 @@ public:
     ProgressWidget(QWidget *parent);
     ~ProgressWidget();
     
+    void setErrorMessage(const QString &errMsg);
+    
     void setFileName(const QString &fileName);
     
     void setMinimum(int size);
     void setMaximum(int size);
     int getMaximum();
+    
+    void resetProgressBar();
     
     void setValue(int size);
     int getValue();

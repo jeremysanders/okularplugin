@@ -26,6 +26,7 @@ ProgressWidget::ProgressWidget(QWidget *parent) : QWidget(parent),  m_ui(new Ui:
 {
   m_ui->setupUi(this);
   
+  m_ui->lblErrorMessage->setText("");
   m_ui->lblDownloadSpeed->setText("");
   m_ui->lblRemainingDlTime->setText("");
   
@@ -138,6 +139,22 @@ void ProgressWidget::setFileName(const QString& fileName)
 {
   m_ui->lblFilename->setText("Downloading " + fileName + " ...");
   m_fileName = fileName;
+}
+
+void ProgressWidget::setErrorMessage ( const QString& errMsg )
+{
+  m_ui->lblErrorMessage->setText(errMsg);
+}
+
+void ProgressWidget::resetProgressBar() {
+  m_timer->stop();
+  m_ui->progressBar->setValue(m_ui->progressBar->minimum());
+  m_ui->lblDownloadSpeed->setText("");
+  m_ui->lblRemainingDlTime->setText("");
+  m_vecDownloadSpeeds.clear();
+  m_lastTimestamp = 0;
+  m_bytesDownloadedTotalLastInterval = 0;
+  m_avgDownloadSpeedWeighted = 0;
 }
 
 ProgressWidget::~ProgressWidget()

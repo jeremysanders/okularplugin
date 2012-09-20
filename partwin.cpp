@@ -137,6 +137,21 @@ PartWin::~PartWin()
 bool PartWin::readData(QIODevice *source, const QString &format)
 {
   
+  // NPRES_NETWORK_ERR:
+  if (source->errorString() == "Network error during download.") {
+    // this error message is also set when user aborts download before it finished.
+    m_progressWidget->resetProgressBar();
+    m_progressWidget->setErrorMessage("Error occurred during download. Reload tab to retry.");
+    return false;
+  }
+
+  // NPRES_USER_BREAK:
+  if (source->errorString() == "User cancelled operation.") {
+    m_progressWidget->resetProgressBar();
+    m_progressWidget->setErrorMessage("Error occurred during download. Reload tab to retry.");    
+    return false;
+  }  
+  
   // Download finished
   m_progressWidget->setValue(m_progressWidget->getMaximum());
   
