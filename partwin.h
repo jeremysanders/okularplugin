@@ -93,9 +93,8 @@ private:
 
     KAction* m_printAction;
     bool m_guiInitialized;
-    QTemporaryFile *m_tmpFile;
     
-    QList<QString> toDeleteFiles;
+    QList<QString> m_filesToDelete;
     
 
 };

@@ -31,8 +31,8 @@
 #include <KXMLGUIFactory>
 
 
-//#define PART_DEBUG() kDebugDevNull()
-#define PART_DEBUG() kWarning()
+#define PART_DEBUG() kDebugDevNull()
+//#define PART_DEBUG() kWarning()
 
 PartWin::PartWin(QWidget *parent)
   : KParts::MainWindow(),  m_progressBarInited(false), m_guiInitialized(false)
@@ -117,19 +117,16 @@ void PartWin::setupActions() {
 
 PartWin::~PartWin()
 {
-  QDir d;
-  for( QList<QString>::const_iterator i = toDeleteFiles.begin(); i != toDeleteFiles.end(); ++i ) {
-      d.remove(*i);
-  }
   
   this->guiFactory()->removeClient(m_part);
   this->guiFactory()->removeClient(this);
   
-  m_tmpFile->remove();
-  
-  delete m_tmpFile;
   delete m_part;
-  delete m_printAction;
+
+  QDir d;
+  for( QList<QString>::const_iterator i = m_filesToDelete.begin(); i != m_filesToDelete.end(); ++i ) {
+      d.remove(*i);
+  }  
 }
 
 /** 
@@ -195,25 +192,24 @@ bool PartWin::readData(QIODevice *source, const QString &format)
     fileName = fileName.left(fileName.length() - extension.length() - ((extension.length() > 0) ? 1 : 0));
   }
 
-  m_tmpFile = new QTemporaryFile("/tmp/" + fileName + "_XXXXXX" + filetype);
-  m_tmpFile->setAutoRemove(true);
+  QTemporaryFile tmpFile("/tmp/" + fileName + "_XXXXXX" + filetype);
+  tmpFile.setAutoRemove(false);
   
   if (!source->open(QIODevice::ReadOnly))
-    return false;
+    return false;  
 
-  if(m_tmpFile->open()) {
+  if(tmpFile.open()) {
       while( ! source->atEnd() ) {
   	QByteArray data = source->read(1024 * 1024 * 1024);
-  	m_tmpFile->write(data);
+  	tmpFile.write(data);
       }
-      m_tmpFile->flush();
+      tmpFile.flush();
   }
   
+  m_filesToDelete.push_back(tmpFile.fileName());  
   this->setupPart();
   
-  toDeleteFiles.push_back(m_tmpFile->fileName());
-  
-  QString url = QString("file://") + m_tmpFile->fileName();
+  QString url = QString("file://") + tmpFile.fileName();
   m_part->openUrl(url);
 
   return true;
