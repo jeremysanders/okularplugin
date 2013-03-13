@@ -26,6 +26,7 @@
   <Action name="view_render_mode"/>
   <Action name="view_continuous"/>
   <Separator name="separator_4"/>
+  <Action name="mouse_drag"/>
   <Action name="mouse_selecttools"/>
   <Separator name="separator_5"/>
   <Action name="view_orientation_rotate_cw"/>
