@@ -42,8 +42,8 @@ kde4_add_library(okularplugin SHARED ${okularplugin_SRCS} ${okularplugin_UI_HDRS
 target_link_libraries(okularplugin ${QT_QTGUI_LIBRARY} ${KDE4_KDEUI_LIBS} ${KDE4_KPARTS_LIBS})
 
 ########### install files ###############
-install(TARGETS okularplugin DESTINATION ${KDE4_LIB_DIR} )
+install(TARGETS okularplugin DESTINATION ${KDE4_LIB_INSTALL_DIR} )
 install( FILES okularpluginui.rc
-	DESTINATION  ${KDE4_DATA_DIR}/okularplugin )
+	DESTINATION  ${DATA_INSTALL_DIR}/okularplugin )
 install( FILES okularplugin_okularui.rc
-	DESTINATION  ${KDE4_DATA_DIR}/okularplugin )
+	DESTINATION  ${DATA_INSTALL_DIR}/okularplugin )
