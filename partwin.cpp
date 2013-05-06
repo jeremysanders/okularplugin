@@ -96,7 +96,7 @@ void PartWin::setupPart() {
 	
 	setupActions();
 
-	setupGUI(ToolBar | Keys | StatusBar | Save);
+	setupGUI(ToolBar | Keys | Save);
 	toolBar("okularToolBar")->setToolButtonStyle(Qt::ToolButtonIconOnly);
 	
 	// integrate the part's GUI with the shell's
