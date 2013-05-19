@@ -78,6 +78,9 @@ public:
 
     // incoming streams (SRC=... tag)
     virtual bool readData(QIODevice *source, const QString &format);
+    
+    // incoming stream progress
+    virtual void readProgress(int lenRead, int size);
 
     // URL stuff
     int openUrl(const QString &url, const QString &window = QString());
