@@ -1,15 +1,12 @@
-<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
-<kpartgui name="okularplugin" version="1">
-
- <MenuBar>
-  <Menu name="file" >
-   <DefineGroup append="open_merge" name="file_open" />
-   <DefineGroup append="save_merge" name="file_save" />
-   <DefineGroup append="print_merge" name="file_print" />
-  </Menu>
-  <Merge/>
+<!DOCTYPE kpartgui SYSTEM 'kpartgui.dtd'>
+<kpartgui name="okularpluginui" version="100">
+ <MenuBar noMerge="1">
+  <!-- 
+    Note: To ignore settings from ui_standards.rc the version number 
+          of this file must be higher than that in ui_standards.rc 
+  -->
+  <!-- we don't want a menubar -->
  </MenuBar>
- <ToolBar noMerge="1" name="mainToolBar" >
-   <Merge/>
+ <ToolBar noMerge="1" name="mainToolBar"><text>Main Toolbar</text>
  </ToolBar>
 </kpartgui>

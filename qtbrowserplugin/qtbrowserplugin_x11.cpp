@@ -83,6 +83,20 @@ extern "C" void qtns_destroy(QtNPInstance* This)
         return;
     delete it.value();
     clients.erase(it);
+    
+    
+    // added by André Frimberger:
+    // reopening a window after the last one (speaking in Qt: Only the root window is opened)
+    // was closed leads to a strange behaviour: save-, printing-dialog and context menus of the
+    // part aren't shown. Reinitialization of qApp fixes this issue, so for now this will be 
+    // a workaround.
+    
+    // destroy qApp if only root window is the only window.
+    if (qApp->allWidgets().count() == 1) {
+      qApp->exit();
+      delete qApp;
+    }    
+    
 }
 
 extern "C" void qtns_shutdown()

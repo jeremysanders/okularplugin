@@ -1,20 +1,53 @@
-This is a KParts-based Okular plugin designed to work as a Firefox
-compatible plugin.
+This is a KParts-based Okular plugin for NPAPI-compatible browsers.
+Tested Browsers are:
+  - Mozilla Firefox
+  - Google Chrome/Chromium
 
 It uses Nokia's QtBrowserPlugin, part of Qt Solutions
 
-Build instructions:
 
-$ cmake .
+-----------------------
+Build instructions
+-----------------------
+
+1. Requirements:
+================
+ - gcc
+ - automoc
+ - cmake
+ - kdelibs5-dev
+
+
+2. Installation:
+================
+$ mkdir build
+$ cd build
+$ cmake ..
 $ make
-$ make install
+$ sudo make install
 
-Make sure that libokularplugin.so is in your mozilla/firefox plugins path
 
-e.g.
+3. Activate Plugin:
+===================
+To activate the plugin, make sure that libokularplugin.so is in your 
+browsers plugin path:
+
+Firefox
+-------
+for 32Bit and 64Bit systems:
 $ mkdir -p ${HOME}/.mozilla/plugins
 $ ln -s /usr/lib/libokularplugin.so ${HOME}/.mozilla/plugins
 
-You'll need to make /usr/lib/libokularplugin.so point to the file
-which was installed by the make install step above.
 
+Chromium
+--------
+for 32Bit and 64Bit systems:
+$ sudo mkdir /usr/lib/chromium-browser/plugins
+$ sudo ln -s /usr/lib/libokularplugin.so /usr/lib/chromium-browser/plugins
+
+
+Chrome
+--------
+for 32Bit and 64Bit systems:
+$ sudo mkdir /opt/google/chrome/plugins
+$ sudo ln -s /usr/lib/libokularplugin.so /opt/google/chrome/plugins
